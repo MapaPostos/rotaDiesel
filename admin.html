@@ -11,7 +11,9 @@
   :root {
     --asphalt: #1c2023; --paper: #f3f1ea; --paper-2: #e9e6db;
     --ink: #17191b; --ink-soft: #52585c;
-    --route: #0e6e4e; --route-soft: #dcece4;
+    /* Identidade Wafran/Trax-IA: gradiente laranja da logo (vermelho-alaranjado → laranja → dourado) */
+    --route: #e8711f; --route-soft: #fbe3cc;
+    --brand-1: #e2472e; --brand-2: #ee7f22; --brand-3: #f4b23c;
     --warn: #b7412f; --warn-soft: #f3ddd7;
     --card: #ffffff; --border: #ddd8ca; --shadow: rgba(20,20,15,.14);
     --header-ink: #f3f1ea;
@@ -20,14 +22,14 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --paper: #14171a; --paper-2: #1b1f22; --ink: #ece9e1; --ink-soft: #9aa0a4;
-      --route: #3fae82; --route-soft: #1c2f27; --warn: #e0685a; --warn-soft: #3a221d;
+      --route: #ff8f47; --route-soft: #3a2414; --warn: #e0685a; --warn-soft: #3a221d;
       --card: #1e2225; --border: #33383c; --shadow: rgba(0,0,0,.45);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --paper: #14171a; --paper-2: #1b1f22; --ink: #ece9e1; --ink-soft: #9aa0a4;
-    --route: #3fae82; --route-soft: #1c2f27; --warn: #e0685a; --warn-soft: #3a221d;
+    --route: #ff8f47; --route-soft: #3a2414; --warn: #e0685a; --warn-soft: #3a221d;
     --card: #1e2225; --border: #33383c; --shadow: rgba(0,0,0,.45);
     color-scheme: dark;
   }
@@ -45,7 +47,8 @@
   header {
     background: var(--asphalt); color: var(--header-ink);
     padding: 16px 16px 14px; margin: 0 -16px 18px;
-    border-bottom: 4px solid var(--route);
+    border-bottom: 4px solid transparent;
+    border-image: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3)) 1;
   }
   header .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; max-width: 720px; margin: 0 auto; padding: 0 16px; }
   header h1 { margin: 0; font-size: 22px; font-weight: 700; }
@@ -177,7 +180,7 @@
   // ======================================================================
 
   const THEME_PRESETS = {
-    default:            { label: "Padrão Trax-IA",     color: "#0e6e4e" },
+    default:            { label: "Padrão Trax-IA",     color: "#e8711f" },
     setembro_amarelo:   { label: "Setembro Amarelo",   color: "#d4a017" },
     outubro_rosa:       { label: "Outubro Rosa",       color: "#d6336c" },
     novembro_azul:      { label: "Novembro Azul",      color: "#1e63c4" },
