@@ -48,7 +48,7 @@
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
   .brand { font-family: 'Barlow Condensed', sans-serif; letter-spacing: .01em; }
   .wrap { max-width: 560px; margin: 0 auto; }
-
+ 
   header {
     position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40;
     background: var(--asphalt); color: var(--paper);
@@ -66,7 +66,7 @@
   .chip.diesel { background: var(--diesel); color: #241a05; }
   .chip.arla { background: var(--arla); color: #06121d; }
   .chip.bandeira { background: var(--paper-2); color: var(--ink); border: 1px solid var(--border); }
-
+ 
   .routetabs {
     display: flex; gap: 8px; overflow-x: auto; padding: 12px 18px 12px;
     -webkit-overflow-scrolling: touch;
@@ -78,7 +78,7 @@
     background: transparent; color: #d7dbd8; cursor: pointer; white-space: nowrap;
   }
   .routetab.active { background: var(--route); border-color: var(--route); color: #fff; }
-
+ 
   .searchwrap { padding: 14px 18px 6px; position: relative; }
   #search {
     width: 100%; padding: 13px 42px 13px 16px; border-radius: 14px; border: 1px solid var(--border);
@@ -101,7 +101,7 @@
   .result-item .rname { font-weight: 600; font-size: 14.5px; }
   .result-item .rcity { font-size: 12.5px; color: var(--ink-soft); }
   .result-empty { padding: 16px; font-size: 13.5px; color: var(--ink-soft); }
-
+ 
   .locwrap { padding: 4px 18px 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .locbtn {
     font-size: 13px; font-weight: 600; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border);
@@ -109,14 +109,14 @@
   }
   .locbtn.active { background: var(--here); border-color: var(--here); color: #fff; }
   .locstatus { font-size: 12px; color: var(--ink-soft); flex: 1; min-width: 140px; }
-
+ 
   main { padding: 8px 0 40px; min-height: 200px; }
   .routewrap { padding: 10px 18px 0; }
   .routewrap p.lead { font-size: 13px; color: var(--ink-soft); margin: 4px 0 14px; max-width: 62ch; }
-
+ 
   .loadingmsg, .errormsg { padding: 30px 18px; font-size: 14px; color: var(--ink-soft); text-align: center; }
   .errormsg { color: var(--here); }
-
+ 
   .stop { display: grid; grid-template-columns: 34px 1fr; column-gap: 12px; }
   .stopline { position: relative; display: flex; flex-direction: column; align-items: center; }
   .dot {
@@ -128,7 +128,7 @@
   @keyframes pulse { 0% { box-shadow: 0 0 0 2px var(--route); } 50% { box-shadow: 0 0 0 8px var(--route-soft); } 100% { box-shadow: 0 0 0 2px var(--route); } }
   .stopline .bar { width: 3px; flex: 1; background: var(--route); opacity: .55; margin-top: 2px; }
   .stop:last-child .stopline .bar { display: none; }
-
+ 
   .stopcard { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px; margin-bottom: 14px; cursor: pointer; position: relative; }
   .stopcard:active { transform: scale(.995); }
   .stopcard.empty { cursor: default; background: transparent; border: 1.5px dashed var(--empty); }
@@ -140,7 +140,7 @@
   .metarow .badge247 { font-size: 11px; font-weight: 600; color: var(--route); border: 1px solid var(--route); border-radius: 999px; padding: 2px 8px; }
   .metarow .badgestatus { font-size: 11px; font-weight: 700; color: #fff; background: var(--route); border-radius: 999px; padding: 2px 9px; letter-spacing: .01em; }
   .metarow .chip { padding: 2px 8px; font-size: 10.5px; }
-
+ 
   .stopcard.here { border: 2px solid var(--here); box-shadow: 0 0 0 4px var(--here-soft); }
   .stopcard.here::before {
     content: "📍 Você está aqui"; position: absolute; top: -12px; right: 12px; background: var(--here);
@@ -155,9 +155,9 @@
   @keyframes pulse-here { 0%, 100% { box-shadow: 0 0 0 4px var(--here-soft); } 50% { box-shadow: 0 0 0 9px var(--here-soft); } }
   .here-card { background: var(--here-soft); border: 1.5px dashed var(--here); border-radius: 14px; padding: 11px 14px; font-size: 13.5px; color: var(--ink); align-self: start; }
   .here-sub { font-size: 12px; color: var(--ink-soft); }
-
+ 
   footer { padding: 18px 18px 30px; font-size: 12px; color: var(--ink-soft); border-top: 1px solid var(--border); margin-top: 6px; }
-
+ 
   #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
   #overlay.open { opacity: 1; pointer-events: auto; }
   #sheet {
@@ -178,7 +178,7 @@
   .btn { flex: 1; text-align: center; padding: 13px 14px; border-radius: 12px; font-weight: 600; font-size: 14.5px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
   .btn.primary { background: var(--route); color: #fff; }
   .btn.ghost { background: var(--paper-2); color: var(--ink); border: 1px solid var(--border); }
-
+ 
   @media (min-width: 720px) {
     #sheet { left: 50%; right: auto; transform: translate(-50%, 100%); width: 560px; border-radius: 20px; bottom: 24px; }
     #sheet.open { transform: translate(-50%, 0); }
@@ -186,7 +186,7 @@
 </style>
 </head>
 <body>
-
+ 
 <div class="wrap">
   <header>
     <div class="row">
@@ -202,44 +202,44 @@
     </div>
     <div class="routetabs" id="routeTabs"></div>
   </header>
-
+ 
   <div class="searchwrap">
     <input id="search" type="text" inputmode="search" autocomplete="off" placeholder="Buscar cidade ou posto...">
     <div id="results"></div>
   </div>
-
+ 
   <div class="locwrap">
     <button class="locbtn" id="locBtn">📍 Ativar localização</button>
     <span class="locstatus" id="locStatus">Mostra onde você está na rota em tempo real.</span>
   </div>
-
+ 
   <main>
     <div class="routewrap"><p class="lead" id="routeLead"></p></div>
     <div class="routewrap" id="stopsList">
       <div class="loadingmsg">Carregando rotas da planilha...</div>
     </div>
   </main>
-
+ 
   <footer>
     Dados carregados em tempo real da planilha Google Sheets — cada aba é uma rota. Cidades sem posto liberado na cotação aparecem marcadas como "Sem posto liberado".
   </footer>
 </div>
-
+ 
 <div id="overlay"></div>
 <div id="sheet"><div class="grabber"></div><div id="sheetContent"></div></div>
-
+ 
 <script>
   // ======================================================================
   // CONFIGURAÇÃO — preencha com os dados da sua planilha
   // ======================================================================
-  const SPREADSHEET_ID = "COLOQUE_AQUI_O_ID_DA_PLANILHA";
+  const SPREADSHEET_ID = "1M5iIlotK9ABiOmMEG028zuL4b6XpOyn1j9wJNPakNRw";
   const API_KEY = "COLOQUE_AQUI_SUA_API_KEY_DO_GOOGLE_CLOUD";
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkxZpP4eeVssIpNLuJq8dlc3ljWG-4qAj6sk7GXYnaMjFTaypwqst6UVqMRHieEht3/exec";
   // Abas cujo nome começa com "_" são ignoradas (úteis para rascunhos/config).
   // APPS_SCRIPT_URL é opcional: se ficar em branco/placeholder, o site funciona
   // normalmente só sem aplicar o tema de campanha definido no painel admin.
   // ======================================================================
-
+ 
   const THEME_PRESETS = {
     default:            { route: "#0e6e4e", routeSoft: "#dcece4" },
     setembro_amarelo:   { route: "#d4a017", routeSoft: "#f7edd2" },
@@ -247,14 +247,20 @@
     novembro_azul:      { route: "#1e63c4", routeSoft: "#dbe8f9" },
     dezembro_vermelho:  { route: "#c1272d", routeSoft: "#f4d6d7" },
   };
-
+ 
   let routesData = {};
   let activeRoute = null;
   let stations = [];
   let watchId = null;
-
+ 
   function normalize(str) {
     return (str || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+  function toNumber(v) {
+    // aceita número já numérico (UNFORMATTED_VALUE) ou texto com vírgula decimal (locale BR)
+    if (typeof v === 'number') return v;
+    if (v === undefined || v === null || v === '') return NaN;
+    return parseFloat(v.toString().trim().replace(',', '.'));
   }
   function haversine(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -266,7 +272,7 @@
   function mapsLink(lat, lon) {
     return `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
   }
-
+ 
   // ---- CARREGAMENTO DA PLANILHA ----
   async function loadRoutesFromSheet() {
     const stopsList = document.getElementById('stopsList');
@@ -277,21 +283,21 @@
       const meta = await metaRes.json();
       const tabNames = meta.sheets.map(s => s.properties.title).filter(t => !t.startsWith('_'));
       if (tabNames.length === 0) throw new Error("Nenhuma aba de rota encontrada na planilha.");
-
+ 
       for (const tab of tabNames) {
-        const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent("'" + tab + "'")}?key=${API_KEY}`;
+        const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent("'" + tab + "'")}?key=${API_KEY}&valueRenderOption=UNFORMATTED_VALUE`;
         const valRes = await fetch(valuesUrl);
         if (!valRes.ok) continue;
         const valJson = await valRes.json();
         routesData[tab] = parseSheetRows(valJson.values || []);
       }
-
+ 
       renderRouteTabs(tabNames.filter(t => routesData[t] && routesData[t].length));
     } catch (err) {
       stopsList.innerHTML = `<div class="errormsg">Não foi possível carregar a planilha.<br>${err.message}<br><br>Confira o SPREADSHEET_ID, a API_KEY e se a planilha está compartilhada como "Qualquer pessoa com o link pode visualizar".</div>`;
     }
   }
-
+ 
   function parseSheetRows(rows) {
     if (!rows || rows.length < 2) return [];
     const headers = rows[0].map(h => normalize(h).trim());
@@ -314,8 +320,8 @@
           id: i + 1,
           city: raw.city || raw.cidade || "",
           uf: raw.uf || "",
-          lat: parseFloat(raw.lat),
-          lon: parseFloat(raw.lon || raw.lng || raw.long),
+          lat: toNumber(raw.lat),
+          lon: toNumber(raw.lon || raw.lng || raw.long),
           hasPosto: hasPosto,
           name: name,
           bandeira: raw.bandeira || "",
@@ -329,7 +335,7 @@
       })
       .filter(s => !isNaN(s.lat) && !isNaN(s.lon)); // toda cidade precisa de coordenada, mesmo sem posto
   }
-
+ 
   // ---- ABAS / SELETOR DE ROTA ----
   function prettyRouteName(name) {
     return name.replace(/[_-]+/g, " → ");
@@ -355,7 +361,7 @@
     clearLocationUI();
     renderStops();
   }
-
+ 
   // ---- RENDER DA ROTA ----
   function renderStops() {
     const stopsList = document.getElementById('stopsList');
@@ -395,12 +401,12 @@
       });
     });
   }
-
+ 
   // ---- FICHA DO POSTO ----
   const overlay = document.getElementById('overlay');
   const sheetEl = document.getElementById('sheet');
   const sheetContent = document.getElementById('sheetContent');
-
+ 
   function openSheet(station) {
     sheetContent.innerHTML = `
       <h2>${station.name}</h2>
@@ -426,7 +432,7 @@
   }
   function closeSheet() { overlay.classList.remove('open'); sheetEl.classList.remove('open'); }
   overlay.addEventListener('click', closeSheet);
-
+ 
   // ---- BUSCA ----
   const searchInput = document.getElementById('search');
   const resultsBox = document.getElementById('results');
@@ -468,12 +474,12 @@
   }
   searchInput.addEventListener('input', (e) => renderResults(e.target.value));
   document.addEventListener('click', (e) => { if (!e.target.closest('.searchwrap')) resultsBox.classList.remove('open'); });
-
+ 
   // ---- LOCALIZAÇÃO DO MOTORISTA ----
   const LOCATE_THRESHOLD_KM = 12;
   const locBtn = document.getElementById('locBtn');
   const locStatus = document.getElementById('locStatus');
-
+ 
   function classifyPosition(lat, lon) {
     const distances = stations.map(s => ({ s, d: haversine(lat, lon, s.lat, s.lon) }));
     distances.sort((a, b) => a.d - b.d);
@@ -544,7 +550,7 @@
     locBtn.textContent = '🛑 Parar localização';
     locBtn.classList.add('active');
   });
-
+ 
   // ---- TEMA ----
   document.getElementById('themeToggle').addEventListener('click', () => {
     const root = document.documentElement;
@@ -553,7 +559,7 @@
     else if (current === 'light') root.removeAttribute('data-theme');
     else root.setAttribute('data-theme', 'dark');
   });
-
+ 
   // ---- TEMA DE CAMPANHA (definido no painel admin.html) ----
   async function loadCampaignTheme() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('COLOQUE_AQUI')) return;
@@ -575,7 +581,7 @@
       }
     } catch (e) { /* sem tema, segue com o padrão */ }
   }
-
+ 
   // ---- INÍCIO ----
   loadRoutesFromSheet();
   loadCampaignTheme();
