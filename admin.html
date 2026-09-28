@@ -91,12 +91,32 @@
   .routeblock h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
   .routeblock .rbtns { margin-left: auto; }
   .stationrow {
-    display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
   }
   .stationrow .info { flex: 1; min-width: 0; }
   .stationrow .city { font-weight: 600; font-size: 14.5px; }
   .stationrow .pname { font-size: 12.5px; color: var(--ink-soft); }
+
+  .stationcard {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    margin-bottom: 8px; overflow: hidden;
+  }
+  .stationcard details { border-top: 1px solid var(--border); }
+  .stationcard summary { cursor: pointer; padding: 9px 14px; font-size: 12.5px; color: var(--ink-soft); font-weight: 600; list-style: none; }
+  .stationcard summary::-webkit-details-marker { display: none; }
+  .stationcard summary::before { content: "▸ "; }
+  .stationcard details[open] summary::before { content: "▾ "; }
+  .editform { padding: 4px 14px 14px; }
+  .editform .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 12px; }
+  .editform .fgrid > div { margin: 0; }
+  @media (max-width: 460px) { .editform .fgrid { grid-template-columns: 1fr; } }
+  .editform input { margin-bottom: 0; }
+  .routeblock h3 { display: flex; align-items: center; gap: 10px; }
+  .addbtn { margin-left: auto; font-size: 12px; padding: 6px 12px; }
+  .addform .card { margin: 10px 0; }
+
+  #importPreview .stationrow select { width: 100%; margin-top: 4px; }
+  #importPreview .likelabel { display: flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
   .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: .2s; }
@@ -143,8 +163,24 @@
 
     <section>
       <h2>Postos por rota</h2>
-      <p class="hint">Ligue ou desligue um posto já cadastrado sem precisar abrir a planilha. A mudança grava direto na aba da rota.</p>
-      <div id="stationsWrap" class="card"><div class="empty">Carregando...</div></div>
+      <p class="hint">Ligue/desligue, cadastre, edite ou remova um posto sem precisar abrir a planilha. Cada cidade da rota é uma linha só: "+ Nova cidade" cria uma linha, "Excluir posto/cidade" remove a linha inteira (some do site dos motoristas).</p>
+      <div id="stationsWrap"><div class="empty card">Carregando...</div></div>
+    </section>
+
+    <section>
+      <h2>Importar da TruckPag</h2>
+      <p class="hint">Solte aqui o CSV exportado da tela "Negociação de Preços de Combustível" do TruckPag. O sistema casa cada cidade da rota escolhida com o(s) posto(s) achado(s) no arquivo — você confere e escolhe qual usar antes de aplicar. Nenhum preço fica salvo nem aparece para o motorista, só o nome do posto, a bandeira e a data da cotação.</p>
+      <div class="card">
+        <label for="importRoute">Rota de destino</label>
+        <select id="importRoute"><option value="">Carregando rotas...</option></select>
+        <label for="importFile" style="margin-top:12px;">Arquivo CSV do TruckPag</label>
+        <input type="file" id="importFile" accept=".csv,text/csv">
+        <div id="importPreview"></div>
+        <div style="margin-top:12px; display:flex; gap:10px;">
+          <button class="btn primary" id="applyImportBtn" disabled>Aplicar importação</button>
+        </div>
+        <div class="msg" id="importMsg"></div>
+      </div>
     </section>
 
     <section>
@@ -261,47 +297,84 @@
   }
 
   // ---- POSTOS ----
+  const STATION_FIELDS = [
+    { key: 'name', label: 'Nome do posto' },
+    { key: 'uf', label: 'UF' },
+    { key: 'address', label: 'Endereço' },
+    { key: 'phone', label: 'Telefone' },
+    { key: 'hours', label: 'Horário' },
+    { key: 'bandeira', label: 'Bandeira' },
+    { key: 'prazo', label: 'Prazo' },
+    { key: 'dataCotacao', label: 'Data da cotação' },
+    { key: 'status', label: 'Status (ex.: Liberado)' },
+    { key: 'lat', label: 'Latitude' },
+    { key: 'lon', label: 'Longitude' },
+  ];
+
+  function esc(v) { return (v === undefined || v === null ? '' : v).toString().replace(/"/g, '&quot;'); }
+
+  function fieldsFormHtml(values) {
+    return `<div class="fgrid">` + STATION_FIELDS.map(f => `
+      <div><label>${f.label}</label><input type="text" data-field="${f.key}" value="${esc(values[f.key])}"></div>`).join('') + `</div>`;
+  }
+
   async function loadStations() {
     const wrap = document.getElementById('stationsWrap');
-    wrap.innerHTML = '<div class="empty">Carregando...</div>';
+    wrap.innerHTML = '<div class="empty card">Carregando...</div>';
     try {
       const res = await jsonpRequest({ action: 'list_stations' });
       if (!res.ok) throw new Error(res.error || 'erro desconhecido');
       stationsCache = res.routes;
       renderStations();
     } catch (e) {
-      wrap.innerHTML = `<div class="empty">Não foi possível carregar os postos.<br>${e.message}</div>`;
+      wrap.innerHTML = `<div class="empty card">Não foi possível carregar os postos.<br>${e.message}</div>`;
     }
   }
 
   function renderStations() {
     const wrap = document.getElementById('stationsWrap');
     const routeNames = Object.keys(stationsCache);
-    if (!routeNames.length) { wrap.innerHTML = '<div class="empty">Nenhuma rota encontrada.</div>'; return; }
+    if (!routeNames.length) { wrap.innerHTML = '<div class="empty card">Nenhuma rota encontrada.</div>'; return; }
     wrap.innerHTML = routeNames.map(route => {
       const rows = stationsCache[route];
       const rowsHtml = rows.map(s => `
-        <div class="stationrow">
-          <div class="info">
-            <div class="city">${s.city}${s.uf ? ' - ' + s.uf : ''}</div>
-            <div class="pname">${s.name ? s.name : 'sem posto cadastrado'}</div>
+        <div class="stationcard" data-route="${esc(route)}" data-city="${esc(s.city)}">
+          <div class="stationrow">
+            <div class="info">
+              <div class="city">${s.city}${s.uf ? ' - ' + s.uf : ''}</div>
+              <div class="pname">${s.name ? s.name : 'sem posto cadastrado'}</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" class="likbchk" ${s.liberado ? 'checked' : ''}>
+              <span class="slider"></span>
+            </label>
           </div>
-          <label class="switch">
-            <input type="checkbox" data-route="${route}" data-city="${s.city.replace(/"/g,'&quot;')}" ${s.liberado ? 'checked' : ''}>
-            <span class="slider"></span>
-          </label>
+          <details>
+            <summary>Editar cadastro</summary>
+            <div class="editform">
+              ${fieldsFormHtml(s)}
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn primary savebtn">Salvar</button>
+                <button type="button" class="btn danger delbtn">Excluir posto/cidade</button>
+              </div>
+              <div class="msg editmsg"></div>
+            </div>
+          </details>
         </div>`).join('');
       return `<div class="routeblock">
-        <h3>${route.replace(/[-_]/g, ' → ')}</h3>
+        <h3>${route.replace(/[-_]/g, ' → ')}<button type="button" class="btn ghost addbtn" data-route="${esc(route)}">+ Nova cidade</button></h3>
         ${rowsHtml}
+        <div class="addform" data-route="${esc(route)}" style="display:none;"></div>
       </div>`;
     }).join('');
 
-    wrap.querySelectorAll('input[type=checkbox]').forEach(chk => {
+    wrap.querySelectorAll('.stationcard').forEach(card => {
+      const route = card.getAttribute('data-route');
+      const city = card.getAttribute('data-city');
+
+      const chk = card.querySelector('.likbchk');
       chk.addEventListener('change', async () => {
         chk.disabled = true;
-        const route = chk.getAttribute('data-route');
-        const city = chk.getAttribute('data-city');
         const liberado = chk.checked;
         try {
           const res = await callApi('toggle_posto', { route, city, liberado });
@@ -312,8 +385,211 @@
         }
         chk.disabled = false;
       });
+
+      card.querySelector('.savebtn').addEventListener('click', async () => {
+        const msg = card.querySelector('.editmsg');
+        const fields = {};
+        card.querySelectorAll('[data-field]').forEach(inp => { fields[inp.getAttribute('data-field')] = inp.value; });
+        msg.textContent = 'Salvando...'; msg.className = 'msg editmsg';
+        try {
+          const res = await callApi('update_station', { route, city, fields: JSON.stringify(fields) });
+          if (res.ok) { msg.textContent = 'Salvo.'; msg.className = 'msg editmsg ok'; loadStations(); }
+          else { msg.textContent = 'Erro: ' + res.error; msg.className = 'msg editmsg err'; }
+        } catch (e) {
+          msg.textContent = 'Erro de conexão.'; msg.className = 'msg editmsg err';
+        }
+      });
+
+      card.querySelector('.delbtn').addEventListener('click', async () => {
+        if (!confirm(`Remover "${city}" da rota ${route}? A cidade some do site dos motoristas.`)) return;
+        const msg = card.querySelector('.editmsg');
+        msg.textContent = 'Excluindo...'; msg.className = 'msg editmsg';
+        try {
+          const res = await callApi('delete_station', { route, city });
+          if (res.ok) { loadStations(); }
+          else { msg.textContent = 'Erro: ' + res.error; msg.className = 'msg editmsg err'; }
+        } catch (e) {
+          msg.textContent = 'Erro de conexão.'; msg.className = 'msg editmsg err';
+        }
+      });
     });
+
+    wrap.querySelectorAll('.addbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const route = btn.getAttribute('data-route');
+        const holder = wrap.querySelector(`.addform[data-route="${route}"]`);
+        const isOpen = holder.style.display !== 'none';
+        wrap.querySelectorAll('.addform').forEach(h => { h.style.display = 'none'; h.innerHTML = ''; });
+        if (isOpen) return;
+        holder.innerHTML = `
+          <div class="card">
+            <div style="margin-bottom:10px;"><label>Cidade *</label><input type="text" data-field="city"></div>
+            ${fieldsFormHtml({})}
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="btn primary createbtn">Adicionar cidade</button>
+            </div>
+            <div class="msg createmsg"></div>
+          </div>`;
+        holder.style.display = 'block';
+        holder.querySelector('.createbtn').addEventListener('click', async () => {
+          const msg = holder.querySelector('.createmsg');
+          const fields = {};
+          holder.querySelectorAll('[data-field]').forEach(inp => { fields[inp.getAttribute('data-field')] = inp.value; });
+          if (!fields.city || !fields.city.trim()) { msg.textContent = 'Informe a cidade.'; msg.className = 'msg createmsg err'; return; }
+          msg.textContent = 'Adicionando...'; msg.className = 'msg createmsg';
+          try {
+            const res = await callApi('add_station', { route, fields: JSON.stringify(fields) });
+            if (res.ok) { loadStations(); }
+            else { msg.textContent = 'Erro: ' + res.error; msg.className = 'msg createmsg err'; }
+          } catch (e) {
+            msg.textContent = 'Erro de conexão.'; msg.className = 'msg createmsg err';
+          }
+        });
+      });
+    });
+
+    const importRoute = document.getElementById('importRoute');
+    if (importRoute) {
+      const current = importRoute.value;
+      importRoute.innerHTML = routeNames.map(r => `<option value="${esc(r)}">${r.replace(/[-_]/g, ' → ')}</option>`).join('');
+      if (routeNames.includes(current)) importRoute.value = current;
+      renderImportPreview();
+    }
   }
+
+  // ---- IMPORTAR CSV DA TRUCKPAG ----
+  // Formato esperado (exportado do TruckPag em "Negociação de Preços de
+  // Combustível"): CSV separado por ";", com colunas Estabelecimento,
+  // Cidade, UF, Combustivel, Valor, Ult. Atualizacao (entre outras).
+  let csvIndex = null;
+
+  function normalizeText(s) {
+    return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toUpperCase();
+  }
+  function parseValorBR(v) {
+    const n = parseFloat((v || '').toString().trim().replace(',', '.'));
+    return isNaN(n) ? Infinity : n;
+  }
+  function extractBandeira(estab) {
+    const m = /-\s*REDE\s+(.+)$/i.exec(estab || '');
+    return m ? ('REDE ' + m[1].trim()) : '';
+  }
+  function parseTruckPagCsv(text) {
+    const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim().length);
+    if (!lines.length) return [];
+    const headers = lines[0].split(';').map(h => h.trim());
+    const idx = {};
+    headers.forEach((h, i) => { idx[h] = i; });
+    const need = ['Estabelecimento', 'Cidade', 'UF', 'Valor', 'Ult. Atualizacao'];
+    for (const n of need) {
+      if (!(n in idx)) throw new Error('Coluna não encontrada no CSV: "' + n + '". Confira se é o arquivo exportado do TruckPag.');
+    }
+    return lines.slice(1).map(line => {
+      const cols = line.split(';');
+      return {
+        estab: (cols[idx['Estabelecimento']] || '').trim(),
+        city: (cols[idx['Cidade']] || '').trim(),
+        uf: (cols[idx['UF']] || '').trim(),
+        valor: (cols[idx['Valor']] || '').trim(),
+        data: (cols[idx['Ult. Atualizacao']] || '').trim(),
+      };
+    }).filter(r => r.city && r.estab);
+  }
+  function buildCsvIndex(rows) {
+    const map = {};
+    rows.forEach(r => {
+      const key = normalizeText(r.city) + '|' + normalizeText(r.uf);
+      (map[key] = map[key] || []).push(r);
+    });
+    Object.values(map).forEach(list => list.sort((a, b) => parseValorBR(a.valor) - parseValorBR(b.valor)));
+    return map;
+  }
+
+  document.getElementById('importFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const preview = document.getElementById('importPreview');
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const rows = parseTruckPagCsv(reader.result);
+        csvIndex = buildCsvIndex(rows);
+        preview.innerHTML = `<p class="hint" style="margin-top:12px;">${rows.length} linha(s) lida(s) do arquivo.</p>`;
+        renderImportPreview();
+      } catch (err) {
+        csvIndex = null;
+        preview.innerHTML = `<div class="empty">${err.message}</div>`;
+        document.getElementById('applyImportBtn').disabled = true;
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+  document.getElementById('importRoute').addEventListener('change', renderImportPreview);
+
+  function renderImportPreview() {
+    const preview = document.getElementById('importPreview');
+    const applyBtn = document.getElementById('applyImportBtn');
+    const route = document.getElementById('importRoute').value;
+    if (!csvIndex || !route || !stationsCache[route]) { applyBtn.disabled = true; return; }
+    const cities = stationsCache[route];
+    let matched = 0, unmatched = 0;
+    const rowsHtml = cities.map(s => {
+      const key = normalizeText(s.city) + '|' + normalizeText(s.uf);
+      const candidates = csvIndex[key];
+      if (!candidates) { unmatched++; return ''; }
+      matched++;
+      const options = candidates.map((c, i) => `<option value="${i}">${esc(c.estab)} — R$ ${esc(c.valor)} (${esc((c.data || '').split(' ')[0])})</option>`).join('');
+      return `<div class="stationrow" style="border:1px solid var(--border); border-radius:12px; margin-bottom:8px;" data-import-city="${esc(s.city)}" data-import-uf="${esc(s.uf)}">
+        <div class="info">
+          <div class="city">${s.city}${s.uf ? ' - ' + s.uf : ''}</div>
+          <select class="importSelect">${options}</select>
+        </div>
+        <label class="likelabel"><input type="checkbox" class="importLiberado" checked> liberar</label>
+      </div>`;
+    }).join('');
+    preview.innerHTML = `
+      <p class="hint" style="margin-top:12px;">${matched} cidade(s) da rota encontradas no arquivo${unmatched ? `, ${unmatched} não encontrada(s) (ficam como estão)` : ''}.</p>
+      ${rowsHtml || '<div class="empty">Nenhuma cidade dessa rota apareceu no arquivo.</div>'}`;
+    applyBtn.disabled = matched === 0;
+  }
+
+  document.getElementById('applyImportBtn').addEventListener('click', async () => {
+    const route = document.getElementById('importRoute').value;
+    const rowEls = Array.from(document.querySelectorAll('#importPreview [data-import-city]'));
+    const msg = document.getElementById('importMsg');
+    const applyBtn = document.getElementById('applyImportBtn');
+    if (!rowEls.length) return;
+    applyBtn.disabled = true;
+    let done = 0, errors = 0;
+    for (const rowEl of rowEls) {
+      const city = rowEl.getAttribute('data-import-city');
+      const uf = rowEl.getAttribute('data-import-uf');
+      const select = rowEl.querySelector('.importSelect');
+      const candIdx = Number(select.value);
+      const key = normalizeText(city) + '|' + normalizeText(uf);
+      const cand = (csvIndex[key] || [])[candIdx];
+      if (!cand) continue;
+      const liberado = rowEl.querySelector('.importLiberado').checked;
+      const fields = {
+        name: cand.estab,
+        bandeira: extractBandeira(cand.estab),
+        dataCotacao: (cand.data || '').split(' ')[0],
+        liberado: liberado,
+      };
+      done++;
+      msg.textContent = `Aplicando ${done}/${rowEls.length}...`; msg.className = 'msg';
+      try {
+        const res = await callApi('update_station', { route, city, fields: JSON.stringify(fields) });
+        if (!res.ok) { errors++; }
+      } catch (e) { errors++; }
+    }
+    msg.textContent = errors
+      ? `Importação concluída com ${errors} erro(s) de ${done} posto(s).`
+      : `Importação concluída — ${done} posto(s) atualizados.`;
+    msg.className = errors ? 'msg err' : 'msg ok';
+    applyBtn.disabled = false;
+    loadStations();
+  });
 
   // ---- DESATIVAR TUDO ----
   document.getElementById('disableAllBtn').addEventListener('click', async () => {
