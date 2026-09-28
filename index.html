@@ -562,10 +562,26 @@
   });
 
   // ---- TEMA DE CAMPANHA (definido no painel admin.html) ----
+  // O Apps Script sempre redireciona (302) toda chamada ao /exec pra outro
+  // domínio, e essa resposta final não manda cabeçalho de CORS — então
+  // fetch() é sempre bloqueado. JSONP contorna isso carregando a resposta
+  // como uma tag <script>, que não passa pela checagem de CORS.
+  function jsonpTheme() {
+    return new Promise((resolve, reject) => {
+      const cbName = '__traxia_theme_cb_' + Date.now();
+      const script = document.createElement('script');
+      const timeoutId = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 10000);
+      function cleanup() { clearTimeout(timeoutId); delete window[cbName]; script.remove(); }
+      window[cbName] = (data) => { cleanup(); resolve(data); };
+      script.src = `${APPS_SCRIPT_URL}?action=get_theme&callback=${cbName}`;
+      script.onerror = () => { cleanup(); reject(new Error('falha ao carregar')); };
+      document.body.appendChild(script);
+    });
+  }
   async function loadCampaignTheme() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('COLOQUE_AQUI')) return;
     try {
-      const res = await fetch(`${APPS_SCRIPT_URL}?action=get_theme`).then(r => r.json());
+      const res = await jsonpTheme();
       if (!res || !res.ok) return;
       let css = '';
       const preset = THEME_PRESETS[res.theme_active];
