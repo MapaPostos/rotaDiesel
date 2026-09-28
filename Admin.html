@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Administrador — Rota Diesel Trax-IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --asphalt: #1c2023; --paper: #f3f1ea; --paper-2: #e9e6db;
+    --ink: #17191b; --ink-soft: #52585c;
+    --route: #0e6e4e; --route-soft: #dcece4;
+    --warn: #b7412f; --warn-soft: #f3ddd7;
+    --card: #ffffff; --border: #ddd8ca; --shadow: rgba(20,20,15,.14);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #14171a; --paper-2: #1b1f22; --ink: #ece9e1; --ink-soft: #9aa0a4;
+      --route: #3fae82; --route-soft: #1c2f27; --warn: #e0685a; --warn-soft: #3a221d;
+      --card: #1e2225; --border: #33383c; --shadow: rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #14171a; --paper-2: #1b1f22; --ink: #ece9e1; --ink-soft: #9aa0a4;
+    --route: #3fae82; --route-soft: #1c2f27; --warn: #e0685a; --warn-soft: #3a221d;
+    --card: #1e2225; --border: #33383c; --shadow: rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .brand { font-family: 'Barlow Condensed', sans-serif; letter-spacing: .01em; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 16px 60px; }
+
+  header {
+    background: var(--asphalt); color: var(--paper);
+    padding: 16px 16px 14px; margin: 0 -16px 18px;
+    border-bottom: 4px solid var(--route);
+  }
+  header .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; max-width: 720px; margin: 0 auto; padding: 0 16px; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+  header .tag { font-size: 11px; color: #cfd4d1; letter-spacing: .02em; margin-top: 2px; }
+  .themebtn {
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: var(--paper);
+    border-radius: 999px; width: 32px; height: 32px; font-size: 14px; cursor: pointer; flex: none;
+  }
+
+  section { margin-bottom: 26px; }
+  h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; margin: 0 0 6px; }
+  p.hint { font-size: 13px; color: var(--ink-soft); margin: 0 0 12px; max-width: 68ch; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+
+  label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  input[type=password], input[type=text], select, textarea {
+    width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--paper-2); color: var(--ink); font-size: 14px; font-family: inherit; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--route); }
+  textarea { min-height: 110px; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 12.5px; resize: vertical; }
+
+  .btn { padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; font-family: inherit; }
+  .btn.primary { background: var(--route); color: #fff; }
+  .btn.ghost { background: var(--paper-2); color: var(--ink); border: 1px solid var(--border); }
+  .btn.danger { background: var(--warn); color: #fff; }
+  .btn:disabled { opacity: .5; cursor: default; }
+
+  .msg { font-size: 13px; margin-top: 10px; }
+  .msg.ok { color: var(--route); } .msg.err { color: var(--warn); }
+
+  #loginCard { max-width: 380px; margin: 40px auto; }
+  #loginCard h2 { text-align: center; }
+
+  #adminApp { display: none; }
+  .toprow { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+
+  .routeblock { margin-bottom: 18px; }
+  .routeblock h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  .routeblock .rbtns { margin-left: auto; }
+  .stationrow {
+    display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 14px; margin-bottom: 8px;
+  }
+  .stationrow .info { flex: 1; min-width: 0; }
+  .stationrow .city { font-weight: 600; font-size: 14.5px; }
+  .stationrow .pname { font-size: 12.5px; color: var(--ink-soft); }
+  .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: .2s; }
+  .slider::before { content: ""; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  .switch input:checked + .slider { background: var(--route); }
+  .switch input:checked + .slider::before { transform: translateX(20px); }
+  .switch input:disabled + .slider { opacity: .5; cursor: default; }
+
+  .presetgrid { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .presetbtn {
+    border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; cursor: pointer;
+    font-size: 12.5px; font-weight: 600; background: var(--card); color: var(--ink); text-align: center; min-width: 96px;
+  }
+  .presetbtn .swatch { width: 100%; height: 20px; border-radius: 6px; margin-bottom: 6px; }
+  .presetbtn.active { border-color: var(--route); }
+
+  .empty { padding: 24px; text-align: center; color: var(--ink-soft); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="row">
+      <div>
+        <h1 class="brand">Painel Administrador</h1>
+        <div class="tag">TRAX-IA · ROTA DIESEL</div>
+      </div>
+      <button class="themebtn" id="themeToggle" title="Alternar tema">🌗</button>
+    </div>
+  </header>
+
+  <div id="loginCard" class="card">
+    <h2>Acesso restrito</h2>
+    <p class="hint">Entre com a senha de administrador para liberar/desligar postos e mudar a aparência do site.</p>
+    <label for="passInput">Senha</label>
+    <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password">
+    <div style="margin-top:12px;"><button class="btn primary" id="loginBtn" style="width:100%;">Entrar</button></div>
+    <div class="msg err" id="loginMsg"></div>
+    <p class="hint" style="margin-top:14px;">Precisa da URL do Apps Script configurada em <code>APPS_SCRIPT_URL</code> no topo deste arquivo. Veja o README.</p>
+  </div>
+
+  <div id="adminApp">
+    <div class="toprow"><button class="btn ghost" id="logoutBtn">Sair</button></div>
+
+    <section>
+      <h2>Postos por rota</h2>
+      <p class="hint">Ligue ou desligue um posto já cadastrado sem precisar abrir a planilha. A mudança grava direto na aba da rota.</p>
+      <div id="stationsWrap" class="card"><div class="empty">Carregando...</div></div>
+    </section>
+
+    <section>
+      <h2>Aparência do site</h2>
+      <p class="hint">Escolha um tema de campanha (ex.: Setembro Amarelo, Novembro Azul) ou cole um CSS próprio. Aplica automaticamente no site dos motoristas.</p>
+      <div class="card">
+        <div class="presetgrid" id="presetGrid"></div>
+        <label for="customCss">CSS personalizado (opcional, avançado)</label>
+        <textarea id="customCss" placeholder=":root { --route: #1e63c4; --route-soft: #dbe8f9; }"></textarea>
+        <div style="margin-top:12px; display:flex; gap:10px;">
+          <button class="btn primary" id="saveThemeBtn">Salvar e aplicar no site</button>
+        </div>
+        <div class="msg" id="themeMsg"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Zona de risco</h2>
+      <div class="card">
+        <p class="hint">Desativa TODOS os postos de todas as rotas de uma vez (todas as cidades passam a mostrar "Sem posto liberado"). Use em caso de quebra geral de negociação.</p>
+        <button class="btn danger" id="disableAllBtn">Desativar todos os postos</button>
+        <div class="msg" id="disableAllMsg"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  // ======================================================================
+  // CONFIGURAÇÃO
+  // ======================================================================
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkxZpP4eeVssIpNLuJq8dlc3ljWG-4qAj6sk7GXYnaMjFTaypwqst6UVqMRHieEht3/exec";
+  // ======================================================================
+
+  const THEME_PRESETS = {
+    default:            { label: "Padrão Trax-IA",     color: "#0e6e4e" },
+    setembro_amarelo:   { label: "Setembro Amarelo",   color: "#d4a017" },
+    outubro_rosa:       { label: "Outubro Rosa",       color: "#d6336c" },
+    novembro_azul:      { label: "Novembro Azul",      color: "#1e63c4" },
+    dezembro_vermelho:  { label: "Dezembro Vermelho",  color: "#c1272d" },
+  };
+
+  let adminPassword = sessionStorage.getItem('traxia_admin_pass') || '';
+  let stationsCache = {};
+  let selectedPreset = 'default';
+
+  function postJson(action, extra) {
+    return fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS no Apps Script
+      body: JSON.stringify({ action, password: adminPassword, ...extra }),
+    }).then(r => r.json());
+  }
+
+  // ---- LOGIN ----
+  const loginCard = document.getElementById('loginCard');
+  const adminApp = document.getElementById('adminApp');
+  const loginMsg = document.getElementById('loginMsg');
+
+  async function tryLogin(pass) {
+    loginMsg.textContent = 'Verificando...';
+    adminPassword = pass;
+    try {
+      const res = await postJson('login', {});
+      if (res.ok) {
+        sessionStorage.setItem('traxia_admin_pass', pass);
+        loginMsg.textContent = '';
+        showAdmin();
+      } else {
+        loginMsg.textContent = 'Senha incorreta.';
+        adminPassword = '';
+      }
+    } catch (e) {
+      loginMsg.textContent = 'Não foi possível falar com o Apps Script. Confira a APPS_SCRIPT_URL.';
+      adminPassword = '';
+    }
+  }
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    tryLogin(document.getElementById('passInput').value);
+  });
+  document.getElementById('passInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryLogin(e.target.value);
+  });
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('traxia_admin_pass');
+    adminPassword = '';
+    adminApp.style.display = 'none';
+    loginCard.style.display = 'block';
+  });
+
+  function showAdmin() {
+    loginCard.style.display = 'none';
+    adminApp.style.display = 'block';
+    loadStations();
+    loadTheme();
+  }
+
+  // ---- POSTOS ----
+  async function loadStations() {
+    const wrap = document.getElementById('stationsWrap');
+    wrap.innerHTML = '<div class="empty">Carregando...</div>';
+    try {
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=list_stations`).then(r => r.json());
+      if (!res.ok) throw new Error(res.error || 'erro desconhecido');
+      stationsCache = res.routes;
+      renderStations();
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty">Não foi possível carregar os postos.<br>${e.message}</div>`;
+    }
+  }
+
+  function renderStations() {
+    const wrap = document.getElementById('stationsWrap');
+    const routeNames = Object.keys(stationsCache);
+    if (!routeNames.length) { wrap.innerHTML = '<div class="empty">Nenhuma rota encontrada.</div>'; return; }
+    wrap.innerHTML = routeNames.map(route => {
+      const rows = stationsCache[route];
+      const rowsHtml = rows.map(s => `
+        <div class="stationrow">
+          <div class="info">
+            <div class="city">${s.city}${s.uf ? ' - ' + s.uf : ''}</div>
+            <div class="pname">${s.name ? s.name : 'sem posto cadastrado'}</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-route="${route}" data-city="${s.city.replace(/"/g,'&quot;')}" ${s.liberado ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>
+        </div>`).join('');
+      return `<div class="routeblock">
+        <h3>${route.replace(/[-_]/g, ' → ')}</h3>
+        ${rowsHtml}
+      </div>`;
+    }).join('');
+
+    wrap.querySelectorAll('input[type=checkbox]').forEach(chk => {
+      chk.addEventListener('change', async () => {
+        chk.disabled = true;
+        const route = chk.getAttribute('data-route');
+        const city = chk.getAttribute('data-city');
+        const liberado = chk.checked;
+        try {
+          const res = await postJson('toggle_posto', { route, city, liberado });
+          if (!res.ok) { alert('Erro: ' + res.error); chk.checked = !liberado; }
+        } catch (e) {
+          alert('Erro de conexão ao salvar.');
+          chk.checked = !liberado;
+        }
+        chk.disabled = false;
+      });
+    });
+  }
+
+  // ---- DESATIVAR TUDO ----
+  document.getElementById('disableAllBtn').addEventListener('click', async () => {
+    if (!confirm('Tem certeza? Isso vai marcar TODAS as cidades de TODAS as rotas como "sem posto liberado".')) return;
+    const msg = document.getElementById('disableAllMsg');
+    msg.textContent = 'Aplicando...'; msg.className = 'msg';
+    try {
+      const res = await postJson('disable_all', {});
+      if (res.ok) { msg.textContent = `Feito. ${res.touched} linha(s) desativada(s).`; msg.className = 'msg ok'; loadStations(); }
+      else { msg.textContent = 'Erro: ' + res.error; msg.className = 'msg err'; }
+    } catch (e) {
+      msg.textContent = 'Erro de conexão.'; msg.className = 'msg err';
+    }
+  });
+
+  // ---- APARÊNCIA ----
+  function renderPresetGrid() {
+    const grid = document.getElementById('presetGrid');
+    grid.innerHTML = Object.entries(THEME_PRESETS).map(([key, p]) => `
+      <button type="button" class="presetbtn ${key === selectedPreset ? 'active' : ''}" data-key="${key}">
+        <div class="swatch" style="background:${p.color};"></div>${p.label}
+      </button>`).join('');
+    grid.querySelectorAll('.presetbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPreset = btn.getAttribute('data-key');
+        renderPresetGrid();
+      });
+    });
+  }
+  renderPresetGrid();
+
+  async function loadTheme() {
+    try {
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=get_theme`).then(r => r.json());
+      if (res.ok) {
+        selectedPreset = res.theme_active || 'default';
+        document.getElementById('customCss').value = res.theme_css || '';
+        renderPresetGrid();
+      }
+    } catch (e) { /* silencioso */ }
+  }
+
+  document.getElementById('saveThemeBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('themeMsg');
+    msg.textContent = 'Salvando...'; msg.className = 'msg';
+    try {
+      const res = await postJson('set_theme', { theme: selectedPreset, customCss: document.getElementById('customCss').value });
+      if (res.ok) { msg.textContent = 'Aparência salva — os motoristas veem a mudança na próxima vez que abrirem o site.'; msg.className = 'msg ok'; }
+      else { msg.textContent = 'Erro: ' + res.error; msg.className = 'msg err'; }
+    } catch (e) {
+      msg.textContent = 'Erro de conexão.'; msg.className = 'msg err';
+    }
+  });
+
+  // ---- TEMA CLARO/ESCURO DA PRÓPRIA PÁGINA ----
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const root = document.documentElement;
+    const current = root.getAttribute('data-theme');
+    if (current === 'dark') root.setAttribute('data-theme', 'light');
+    else if (current === 'light') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', 'dark');
+  });
+
+  // ---- INÍCIO: se já tiver senha salva na sessão, entra direto ----
+  if (adminPassword) { tryLogin(adminPassword); }
+</script>
+</body>
+</html>
