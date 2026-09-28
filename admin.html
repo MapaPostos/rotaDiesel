@@ -188,14 +188,30 @@
   let stationsCache = {};
   let selectedPreset = 'default';
 
+  // O Apps Script sempre redireciona (302) toda chamada ao /exec pra outro
+  // domínio, e essa resposta final não manda cabeçalho de CORS — então
+  // fetch()/XHR são sempre bloqueados pelo navegador. JSONP contorna isso:
+  // em vez de fetch(), carrega a resposta como uma tag <script>, que não
+  // passa pela checagem de CORS.
+  let jsonpCounter = 0;
+  function jsonpRequest(params) {
+    return new Promise((resolve, reject) => {
+      const cbName = '__traxia_cb_' + (jsonpCounter++) + '_' + Date.now();
+      const script = document.createElement('script');
+      const timeoutId = setTimeout(() => { cleanup(); reject(new Error('Tempo esgotado ao falar com o Apps Script.')); }, 15000);
+      function cleanup() { clearTimeout(timeoutId); delete window[cbName]; script.remove(); }
+      window[cbName] = (data) => { cleanup(); resolve(data); };
+      const qs = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => qs.set(k, String(v)));
+      qs.set('callback', cbName);
+      script.src = `${APPS_SCRIPT_URL}?${qs.toString()}`;
+      script.onerror = () => { cleanup(); reject(new Error('Falha ao carregar o Apps Script (confira a APPS_SCRIPT_URL).')); };
+      document.body.appendChild(script);
+    });
+  }
+
   function callApi(action, extra) {
-    // Sempre GET: o Apps Script redireciona (302) toda chamada ao /exec, e
-    // nesse redirecionamento o navegador descarta o corpo de um POST — GET
-    // não tem corpo pra perder, então é a forma confiável de chamar isso
-    // pelo fetch() do navegador.
-    const params = new URLSearchParams({ action, password: adminPassword });
-    Object.entries(extra || {}).forEach(([k, v]) => params.set(k, String(v)));
-    return fetch(`${APPS_SCRIPT_URL}?${params.toString()}`).then(r => r.json());
+    return jsonpRequest({ action, password: adminPassword, ...(extra || {}) });
   }
 
   // ---- LOGIN ----
@@ -246,7 +262,7 @@
     const wrap = document.getElementById('stationsWrap');
     wrap.innerHTML = '<div class="empty">Carregando...</div>';
     try {
-      const res = await fetch(`${APPS_SCRIPT_URL}?action=list_stations`).then(r => r.json());
+      const res = await jsonpRequest({ action: 'list_stations' });
       if (!res.ok) throw new Error(res.error || 'erro desconhecido');
       stationsCache = res.routes;
       renderStations();
@@ -328,7 +344,7 @@
 
   async function loadTheme() {
     try {
-      const res = await fetch(`${APPS_SCRIPT_URL}?action=get_theme`).then(r => r.json());
+      const res = await jsonpRequest({ action: 'get_theme' });
       if (res.ok) {
         selectedPreset = res.theme_active || 'default';
         document.getElementById('customCss').value = res.theme_css || '';
