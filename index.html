@@ -18,6 +18,7 @@
     --card: #ffffff; --border: #ddd8ca; --shadow: rgba(20,20,15,.14);
     --here: #b7412f; --here-soft: #f3ddd7;
     --empty: #9a948270;
+    --header-ink: #f3f1ea;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -51,14 +52,14 @@
 
   header {
     position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40;
-    background: var(--asphalt); color: var(--paper);
+    background: var(--asphalt); color: var(--header-ink);
     padding: 14px 18px 0; border-bottom: 4px solid var(--route);
   }
   header .row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
   header h1 { margin: 0; font-size: 26px; font-weight: 700; line-height: 1; }
   header .tag { font-size: 11px; color: #cfd4d1; letter-spacing: .02em; margin-top: 3px; }
   .themebtn {
-    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: var(--paper);
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: var(--header-ink);
     border-radius: 999px; width: 34px; height: 34px; font-size: 15px; flex: none; cursor: pointer;
   }
   .fuelchips { margin-top: 10px; display: flex; gap: 8px; }
